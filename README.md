@@ -31,7 +31,7 @@ In config file, set database name and password.
 // config.php
 
 $config['database'] = array(
-    'dns' => 'mysql:host=localhost;dbname=koala',
+    'dsn' => 'mysql:host=localhost;dbname=koala',
     'user' => 'koala',
     'password' => 'koala'
 );
@@ -50,7 +50,7 @@ We need two fields 'title' and 'content'.
 </form>
 ```
 
-And then tell the outlaw where to **inject** the data in the blog controller.
+And then tell the outlaw where to **create** the data in the blog controller.
 ```php
 function __construct(){
     $this->ol = new Outlaw();
@@ -58,7 +58,7 @@ function __construct(){
 
 public function create()
 {
-    $this->ol->inject('articles');
+    $this->ol->create('articles');
 }    
 ```
 Now check your database, the 'articles' table is created, and you just inserted one row into it!
@@ -66,10 +66,10 @@ Now check your database, the 'articles' table is created, and you just inserted 
 ### Read
 
 We also need a place to see all the articles.
-Let's **gather** them first.
+Let's **readAll** them first.
 ```php
 public function index(){
-    $this->data['articles'] = $this->ol->gather('articles');
+    $this->data['articles'] = $this->ol->readAll('articles');
     $this->template->build('product/index', $this->data);
 }
 ```
@@ -81,32 +81,32 @@ So you can use them.
     <?php echo $a->content ?>
 <?php endforeach; ?>
 ```
-To view a single article, tell the outlaw the table name and id to **take** it.
+To view a single article, tell the outlaw the table name and id to **read** it.
 ```php
 function view($id){
-    $this->data['article'] = $this->ol->take('articles', $id);
+    $this->data['article'] = $this->ol->read('articles', $id);
     $this->template->build('demo/view', $this->data);        
 }
 ```
 
 ### Update
 
-To edit an article, tell the outlaw the table name and id to **pollute** it.
+To edit an article, tell the outlaw the table name and id to **update** it.
 ```php
 function update(){
     $id = $_POST['ol_id'];
-    $this->ol->pollute('articles', $id))
+    $this->ol->update('articles', $id))
     redirect('/blog/view/' . $id);
 }
 ```
 
 ### Delete
 
-To delete an article, tell the outlaw the table name and id so outlaw can know who to **murder**.
+To delete an article, tell the outlaw the table name and id so outlaw can know who to **delete**.
 ```php
 function delete(){
     $id = $_REQUEST['id'];
-    $this->ol->murder('articles', $id);
+    $this->ol->delete('articles', $id);
     redirect('/blog');
 }
 ```
@@ -157,11 +157,11 @@ $config['rules'] = array(
     ]
 );
 ```
-It utilize in **inject** and **pollute** method.
+It utilize in **create** and **update** method.
 If fail to pass validation, they return false. 
 And you can get validation error message by getErrors methd.
 ```php
-      if ($this->ol->pollute('articles', $id)){
+      if ($this->ol->update('articles', $id)){
           redirect('/demo/view/' . $id);
       }
       else{
@@ -193,7 +193,7 @@ Then you can utilize the relationship as this(notice the **ownArticles** attribu
 echo $article->users->name;
 
 // parent to children
-$user = $ol->take('users', '5');
+$user = $ol->read('users', '5');
 foreach ($user->ownArticles as $article){
     echo $article->title;
 }
@@ -225,23 +225,23 @@ And the usage becomes:
 * Type as less characters as possible.
 
 ## API
-* inject ($table_name)
+* create ($table_name)
 
 > Insert other $_REQUEST parameters prefixed with 'ol_' into $table_name.
 
-* take ($table_name, $id)
+* read ($table_name, $id)
 
 > Fetch one single row.
 
-* pollute ($table_name, $id)
+* update ($table_name, $id)
 
 > Update one single row.
 
-* murder ($table_name, $id)
+* delete ($table_name, $id)
 
 > Delete one row.
 
-* gather ($table_name)
+* readAll ($table_name)
 
 > Get all the rows.
 

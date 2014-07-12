@@ -44,7 +44,7 @@ class Outlaw{
       
         require_once('config.php');
 
-        R::setup($config['database']['dns'], $config['database']['user'], $config['database']['password']);    
+        R::setup($config['database']['dsn'], $config['database']['user'], $config['database']['password']);    
         
         V::langDir(__DIR__.'/src/Valitron/lang'); // always set langDir before lang.
         V::lang($config['lang']);
@@ -54,11 +54,12 @@ class Outlaw{
         $this->uploadPath = $config['upload_path'];                
     }
 
+
     /*
      * A very dangerous method which inserting data into database.
      * 
      */
-    function inject($table_name=null){
+    function create($table_name=null){
         if (!$table_name) throw new OutlawNoTableName();
 
         $instance = R::dispense($table_name);
@@ -167,7 +168,7 @@ class Outlaw{
     }
     
     // A very dangerous method which removes data from database.
-    function murder($table_name, $id){
+    function delete($table_name, $id){
         if (!$table_name) throw new OutlawNoTableName();
         if (!$id) throw new OutlawNoId();
         $instance = R::load($table_name, $id);
@@ -175,7 +176,7 @@ class Outlaw{
     }
     
     // Fetch data from table.
-    function take($table_name=null, $id=null){
+    function read($table_name=null, $id=null){
         if (!$table_name) throw new OutlawNoTableName();
         if (!$id) throw new OutlawNoId();
         $instance = R::load($table_name, $id);
@@ -183,7 +184,7 @@ class Outlaw{
     }
 
     // Update data into table
-    function pollute($table_name=null, $id){
+    function update($table_name=null, $id){
         if (!$table_name) throw new OutlawNoTableName();
         if (!$id) throw new OutlawNoId();
 
@@ -213,9 +214,28 @@ class Outlaw{
      * @params String
      * @return Array of RedBean beans
      */
-    function gather($table_name=null){
+    function readAll($table_name=null){
         if (!$table_name) throw new OutlawNoTableName();
         return R::findAll($table_name);
+    }
+
+    /*
+     * Keep the methods here for the compatiblility with v1.0
+     */
+    function inject($table_name=null){
+        return $this->create($table_name);
+    }
+    function take($table_name=null, $id=null){
+        return $this->read($table_name, $id);
+    }
+    function pollute($table_name=null, $id){
+        return $this->update($table_name, $id);
+    }
+    function murder($table_name, $id){
+        return $this->delete($table_name, $id);
+    }
+    function gather($table_name=null){
+        return $this->readAll($table_name);
     }
     
 }
