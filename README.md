@@ -128,7 +128,7 @@ Then in the html:
 <input type="file" name='ol_logo'>
 ```
 
-Outlaw will rename the files, store them in the path, and save the file name in attributes after **inejct**.
+Outlaw will rename the files, store them in the path, and save the file name in attributes after **create**.
 
 For instance, we could show the above files like this:
 
