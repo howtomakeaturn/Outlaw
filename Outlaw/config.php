@@ -41,3 +41,17 @@ $config['lang'] = 'en';
  */                
 $config['upload_path'] = './upload/';             
         
+/*
+$config['singleton_data'] = array(
+    'site' => array(
+        'name' => 'Kelly',
+        'contact' => 'Hi, I am Kelly'
+    )
+);
+
+$config['auth'] = array(
+    'user' => 'kelly',
+    'password' => 'kelly'
+);
+
+*/

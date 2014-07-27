@@ -137,9 +137,7 @@ For instance, we could show the above files like this:
     <img src='/upload/<?php echo $article->logo ?>' />    
 ```
 
-## Advanced Topics
-
-### Validation
+## Validation
 Validating with Valitron:
 
 https://github.com/vlucas/valitron
@@ -170,7 +168,7 @@ And you can get validation error message by getErrors methd.
 
 ```
 
-### One-to-many Relationship
+## One-to-many Relationship
 Let's say you want to assign an author for the article.
 The user has an id value of '5' in 'users' table.
 ```html
@@ -199,7 +197,7 @@ foreach ($user->ownArticles as $article){
 }
 ```
 
-### Upload Multiple Files
+## Upload Multiple Files
 
 Add 'multiple' attribute and '[]' to the name:
 
@@ -217,6 +215,75 @@ And the usage becomes:
 <?php endforeach; ?>
 ```
 
+## Singleton Data
+
+Sometimes we need tables that will always have only one row in it.
+For example, contact information, website settings, and etc.
+We don't really need complete CRUD for this since we will never delete it or insert new row.
+
+Outlaw solve this with singleton data.
+In config file, set the **singleton_data** index with table structure and default value:
+
+```php
+$config['singleton_data'] = array(
+    'site' => array(
+        'name' => 'Kelly',
+        'contact' => 'Hi, I am Kelly'
+    )
+);
+```
+Outlaw will create the 'site' table with two fields 'name' and 'contact', inserting the row with default value while initializing.
+
+You can get the singleton data with **readSingleton** method:
+
+```php
+    $this->data['site'] = $this->ol->readSingleton('site');
+    $this->template->build('admin/edit_contact', $this->data);        
+```
+And update the singleton data with the same rules for basic CRUD operations with **updateSingleton** method:
+```php
+    $this->ol->updateSingleton('site')
+```
+
+## User Authentication
+Sometimes we just want to have a simple and fast way to protect certian pages. 
+
+We don't want to implement password hash procedure, member system and even the views for login and register since there's even only one admin user will need to login the application!
+
+Set the 'auth' with user name and password:
+```php
+$config['auth'] = array(
+    'user' => 'kelly',
+    'password' => 'kelly123'
+);
+```
+And call the **protect** method in the pages you want to protect.
+Outlaw will render a simple view with input fields to ask users login.
+
+```php
+    $this->ol->protect();
+```
+
+## Helper Functions
+
+Outlaw is built-in with some global functions.
+
+Create a html button to allow sending http POST requests.
+```php
+button_to($html_class, $url, $data, $label, $confirm_msg)
+```
+Create a html hidden input. Just to type less characters.
+```php
+hidden($name, $value)
+```
+Check the content of variables. Debugging purpose.
+```php
+look($v)
+```
+Transform the raw string with proper html format like break line to 'br tag', space to '&nsbp'.., and etc.
+```php
+ typography($string)
+```
 
 ## Reserved Words in html input name
 * ol_belong_*
@@ -248,6 +315,18 @@ And the usage becomes:
 * getErrors()
 
 > Get error messages about validation failure.
+
+* readSingleton($tableName)
+
+> Read the only one row from the table.
+
+* updateSingleton($tableName)
+
+> Update the only one row from the table.
+
+* protect()
+
+> Protect the certain pages and ask users for name/password.
 
 ## Technical Detail
 * Manipulate the database with Redbeanphp 3.5

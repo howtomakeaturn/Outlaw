@@ -3,12 +3,15 @@
 require_once(realpath(dirname(__FILE__)) . '/src/rb.php');
 require_once(__DIR__ . '/src/Valitron/Validator.php');
 require_once(__DIR__ . '/src/Exceptions.php');
+require_once(__DIR__ . '/src/Helpers.php');
 use Valitron\Validator as V;
 class Outlaw{
     
     protected $validate;
     protected $errors;
     protected $uploadPath;
+    protected $singletonData;
+    protected $authData;
 
     // Transform the $_FILES if it's multiple files into
     // a cleaner format.
@@ -52,8 +55,45 @@ class Outlaw{
         $this->validate = $config['rules'];
         
         $this->uploadPath = $config['upload_path'];                
+        if (array_key_exists('singleton_data', $config)){ 
+            $this->singletonData = $config['singleton_data'];
+            $this->initializeSingletonData();
+        }
+        if (array_key_exists('auth', $config)){ 
+            $this->authData = $config['auth'];
+        }
+        
+    }
+    
+    /*
+     * Create tables that only contain one row if needed.
+     */    
+    function initializeSingletonData(){
+        foreach($this->singletonData as $tableName => $tableData){
+            // check if table created or not            
+            // if it existed, we leave.
+            if (R::findOne($tableName)){
+                continue;
+            }
+            
+            $instance = R::dispense($tableName);
+            $instance->import($tableData);
+            R::store($instance);
+        }
+    }
+    
+    // Fetch the singleton data from table.
+    function readSingleton($tableName){
+        if (!$tableName) throw new OutlawNoTableName();
+        $instance = R::findOne($tableName);
+        return $instance;
     }
 
+    // Update the singleton data into table
+    function updateSingleton($tableName){
+        $instance = R::findOne($tableName);
+        return $this->update($tableName, $instance->id);        
+    }
 
     /*
      * A very dangerous method which inserting data into database.
@@ -236,6 +276,43 @@ class Outlaw{
     }
     function gather($table_name=null){
         return $this->readAll($table_name);
+    }
+    
+    /*
+     * A simple way to protect pages from unauthorized users.
+     */
+    function protect(){
+        session_start();
+        if (isset($_SESSION['ol_logined'])){
+            return true;
+        }
+        if ( isset($_POST['ol_user'] ) && isset( $_POST['ol_password'] )){
+            if ( ($_POST['ol_user'] === $this->authData['user']) &&
+                ($_POST['ol_password'] === $this->authData['password'])
+            ){
+                $_SESSION['ol_logined'] = true;
+                return true;
+            }
+            echo 'Login failed.';
+            exit();
+        }
+        echo "<form action='" . $_SERVER['PHP_SELF'] . "' method='post'>\n";
+        echo "User: <br />\n";
+        echo "<input type='text' name='ol_user' required /><br />\n";
+        echo "Password: <br />\n";
+        echo "<input type='password' name='ol_password' required /><br />\n";
+        echo "<input type='submit' value='Login' />\n";
+        echo "</form>\n";
+        exit();
+    }
+    
+    /*
+     * Logout the user from the protection.
+     */
+    function logout(){
+        session_start();
+        unset($_SESSION['ol_logined']);
+        return true;
     }
     
 }
