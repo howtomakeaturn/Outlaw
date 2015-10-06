@@ -246,7 +246,7 @@ And update the singleton data with the same rules for basic CRUD operations with
 ```
 
 ## User Authentication
-Sometimes we just want to have a simple and fast way to protect certian pages. 
+Sometimes we just want to have a simple and fast way to protect certain pages. 
 
 We don't want to implement password hash procedure, member system and even the views for login and register since there's even only one admin user will need to login the application!
 
